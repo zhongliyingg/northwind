@@ -33,10 +33,6 @@ spark_read_jdbc = spark.read \
                     .option("driver", settings.NORTHWIND_DB_DRIVER) \
 
 
-# Dict to hold all initialised Dataframes for query later on
-dataframes = {}
-
-
 def read_table_from_db(table_name):
     print("Reading Table from Northwind Database: {}".format(table_name))
     
@@ -103,24 +99,8 @@ def init():
             data_name = camel_to_snake(t)
             df = create_view_from_csv(data_name)
 
-        # Loading data into dataframes dict
-        dataframes[data_name] = df
-    
-    print("--------------------------------------------\n")
-
     print("Loaded Temp Views:")
     spark.sql("show tables").show()
 
-    print("--------------------------------------------\n")
-
-    print("Loaded Dataframes:")
-    for df_name, df_schema in dataframes.items():
-        print("> {}".format(df_name))
-        print(df_schema)
-        print("")
-
-    print("--------------------------------------------\n")
-
     print("Northwind Data Load Completed.")
-    print("You may query data in the Temp Views using `spark.sql`" 
-            "or access the Dataframes dict `from data import dataframes`.")
+    print("You may query data in the Temp Views using `spark.sql`" )
