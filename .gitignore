@@ -1,0 +1,7 @@
+metastore_db/*
+
+data/parquet/*
+!data/parquet/.gitkeep
+
+*.pyc
+*.log
