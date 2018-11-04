@@ -7,4 +7,4 @@ NORTHWIND_DB_PASSWORD = 'relational'
 NORTHWIND_DB_DRIVER = 'com.mysql.jdbc.Driver'
 
 DATA_PARQUET_PATH = 'data/parquet'
-DATA_CSV_PATH = 'data/csv'
+DATA_BACKUP_PARQUET_PATH = 'data/backup_parquet'

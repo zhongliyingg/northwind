@@ -44,9 +44,9 @@ def read_table_from_db(table_name):
     df = spark_read_jdbc.option("dbtable", dbtable).load()
     return df
 
-def format_parquet_data_path(data_name):
+def format_parquet_data_path(data_name, path=settings.DATA_PARQUET_PATH):
     return "{data_parquet_path}/{data_name}" \
-                .format(data_parquet_path=settings.DATA_PARQUET_PATH, data_name=data_name)
+                .format(data_parquet_path=path, data_name=data_name)
 
 def extract_table_from_db_to_parquet(table_name):
     print("Extracting Table from Northwind Database: {}".format(table_name))
@@ -65,24 +65,13 @@ def extract_table_from_db_to_parquet(table_name):
 
     return data_name
 
-def create_view_from_parquet(data_name):
-    print("Creating Temp View from Parquet Files: {}".format(data_name))
-
-    parquet_path = format_parquet_data_path(data_name)
+def create_view_from_parquet(path, data_name):
+    parquet_path = format_parquet_data_path(data_name, path)
+    print("Creating Temp View from Parquet Files: {}".format(parquet_path))
+    
     df = spark.read.parquet(parquet_path)
     df.printSchema()
     df.createOrReplaceTempView(data_name)
-    return df
-
-def create_view_from_csv(name):
-    print "Creating Temp View from CSV Files: {}".format(name)
-
-    df = spark.read.load("{data_csv_path}/northwind_{name}.csv"\
-                            .format(data_csv_path=settings.DATA_CSV_PATH, name=name),
-                            format="csv", sep=",", inferSchema="true", header="true")
-    df = camel_to_snake_columns(df)
-    df.printSchema()
-    df.createOrReplaceTempView(name)
     return df
 
 def init():
@@ -90,14 +79,15 @@ def init():
 
     for t in NORTHWIND_TABLES:
         print('Initialising Data: {table}'.format(table=t))
+        data_name = camel_to_snake(t)
+
         try:
             print("Reading data from Northwind Database...")
-            data_name = extract_table_from_db_to_parquet(t)
-            df = create_view_from_parquet(data_name)
+            extract_table_from_db_to_parquet(t)
+            df = create_view_from_parquet(settings.DATA_PARQUET_PATH, data_name)
         except:
-            print("Something wrong happened. Reading data from archived CSVs.")
-            data_name = camel_to_snake(t)
-            df = create_view_from_csv(data_name)
+            print("Something wrong happened. Reading data from backup Parquet Files.")
+            df = create_view_from_parquet(settings.DATA_BACKUP_PARQUET_PATH, data_name)
 
     print("Loaded Temp Views:")
     spark.sql("show tables").show()

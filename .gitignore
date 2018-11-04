@@ -5,3 +5,5 @@ data/parquet/*
 
 *.pyc
 *.log
+
+.DS_Store
